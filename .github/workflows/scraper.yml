@@ -1,116 +1,56 @@
+
+name: Actualizar Riesgo País
+
 on:
-
-
   schedule:
-
-
-    - cron: "0 * * * *"  # cada hora
-
-
+    - cron: "0 * * * *"  # Cada hora
   workflow_dispatch:
 
-
+permissions:
+  contents: write
 
 jobs:
-
   scraper:
-
     runs-on: ubuntu-latest
 
-
-
     steps:
+      # 1. Clonar repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # 1️⃣ Clonar el repositorio
-
-
-      - uses: actions/checkout@v3
-
-
-
-      # 2️⃣ Configurar Python
-
+      # 2. Configurar Python
       - name: Set up Python
-
-
-        uses: actions/setup-python@v4
-
+        uses: actions/setup-python@v5
         with:
+          python-version: '3.12'
 
-          python-version: 3.9
-
-
-
-
-      # 3️⃣ Instalar dependencias Python
-
+      # 3. Instalar dependencias
       - name: Install dependencies
-
         run: |
-
           python -m pip install --upgrade pip
-
           pip install selenium webdriver-manager
 
-
-
-
-      # 4️⃣ Instalar Google Chrome (estable)
-
-
+      # 4. Instalar Google Chrome
       - name: Install Chrome
-
         run: |
-
           sudo apt-get update
-
-          sudo apt-get install -y wget unzip xvfb
-
-
+          sudo apt-get install -y wget
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
-          sudo apt install -y ./google-chrome-stable_current_amd64.deb
-
-
-
-
-
-      # 5️⃣ Ejecutar scraper usando webdriver-manager
-
-
-
-
-
-
-
+      # 5. Ejecutar scraper
       - name: Run scraper
-
         run: |
-
-
           python EMBI.py
 
-
-
-
-      # 6️⃣ Commit y push del JSON generado
-
+      # 6. Guardar JSON en GitHub
       - name: Commit JSON
-
-
-
         run: |
-
-
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
-
-
           git config --local user.name "GitHub Actions"
 
           git add EMBI.json
 
-
           git diff --cached --quiet || git commit -m "Actualizar JSON de Riesgo País"
 
-
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/ManuUBA/EMBI-Argentine-API.git HEAD:main
+          git push origin HEAD:main

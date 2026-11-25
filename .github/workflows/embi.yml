@@ -3,7 +3,7 @@ name: Actualizar Riesgo País
 
 on:
   schedule:
-    - cron: "17 * * * *"  # Cada hora
+    - cron: "38 * * * *"  # Cada hora
   workflow_dispatch:
 
 permissions:

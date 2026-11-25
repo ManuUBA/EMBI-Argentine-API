@@ -1,0 +1,56 @@
+
+name: Actualizar Riesgo País
+
+on:
+  schedule:
+    - cron: "17 * * * *"  # Cada hora
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scraper:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Clonar repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configurar Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 3. Instalar dependencias
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium webdriver-manager
+
+      # 4. Instalar Google Chrome
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      # 5. Ejecutar scraper
+      - name: Run scraper
+        run: |
+          python EMBI.py
+
+      # 6. Guardar JSON en GitHub
+      - name: Commit JSON
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
+
+          git add EMBI.json
+
+          git diff --cached --quiet || git commit -m "Actualizar JSON de Riesgo País"
+
+          git push origin HEAD:main
